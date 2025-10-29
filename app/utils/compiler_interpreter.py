@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+from datetime import datetime
 
 ##############################################################
 
@@ -61,6 +62,7 @@ async def submit_backgroundTask(
     db:Session,
     language:str,
     current_user:str,
+    submited_time:datetime,
 
 ):
     ## get testcase results for each question
@@ -83,7 +85,7 @@ async def submit_backgroundTask(
         q_result += [{"question_id": question_id, "percentage":percentage}]
 
     ## save data at database
-    await result_store(candidate_id=current_user, result=q_result, db=db)
+    await result_store(candidate_id=current_user, result=q_result, db=db, submited_time=submited_time)
 
     return
 

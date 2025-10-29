@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Query, Depends, BackgroundTasks
 from typing import Annotated
 from sqlalchemy.orm import Session
+from datetime import datetime
+from zoneinfo import ZoneInfo
 ##########################################################
 
 from ..utils.temp_file_handeling import code_push_toFile
@@ -16,7 +18,7 @@ router = APIRouter(prefix="/interpreter")
 @router.post("/test_cases")
 async def run_test_case(
     language:Annotated[languages, Query()],
-    file_list:Annotated[str, Depends(code_push_toFile)],
+    file_list:Annotated[list, Depends(code_push_toFile)],
     db:Annotated[Session, Depends(get_db)],
     current_user:str = "S0001", ## make this as jwt dependency
 ):
@@ -30,13 +32,14 @@ async def run_test_case(
 async def submit_results(
     backgroundTask:BackgroundTasks,
     language:Annotated[languages, Query()],
-    file_list:Annotated[str, Depends(code_push_toFile)],
+    file_list:Annotated[list, Depends(code_push_toFile)],
     db:Annotated[Session, Depends(get_db)],
     current_user:str = "S0001", ## make this as jwt dependency
 ):
     try:
         ## create background task to save the results at
-        backgroundTask.add_task(submit_backgroundTask,file_list,db,language,current_user)
+        submited_time = datetime.now(ZoneInfo("Asia/Kolkata"))
+        backgroundTask.add_task(submit_backgroundTask,file_list,db,language,current_user,submited_time)
         return {"message":"successfully submited!!"}
     except Exception as e:
         raise e
