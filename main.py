@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from app.models.compiler import CompilerModelBase
 from app.db import engine
 from app.routers import compiler_question
+from app.routers import compiler_interpreter
 
 
 app = FastAPI()
@@ -14,6 +15,7 @@ async def startup():
     return
 
 app.include_router(compiler_question.router)
+app.include_router(compiler_interpreter.router)
 
 
 

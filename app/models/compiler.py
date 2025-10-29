@@ -1,6 +1,6 @@
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import Column, INTEGER, FLOAT, String, TEXT, JSON
-from sqlalchemy.ext.mutable import MutableDict, MutableList
+from sqlalchemy import Column, INTEGER,  String, TEXT, JSON, ForeignKey
+from sqlalchemy.ext.mutable import  MutableList
 
 
 class CompilerModelBase(DeclarativeBase):
@@ -19,6 +19,18 @@ class Questions(CompilerModelBase):
     test_cases = Column(MutableList.as_mutable(JSON), nullable=False)
 
 
+class CandidateInfo(CompilerModelBase):
+    __tablename__ = "candidate_info"
 
+    candidate_id = Column(String(25), primary_key=True, nullable=False)
+
+
+class CandidateExamResult(CompilerModelBase):
+    __tablename__ = "candidate_exam_result"
+
+    candidate_id = Column(String(25), ForeignKey(column="candidate_info.candidate_id"), primary_key=True, nullable=False)
+    score = Column(MutableList.as_mutable(JSON), nullable=False)
+    
+    
 
 
