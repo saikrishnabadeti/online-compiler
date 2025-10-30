@@ -17,6 +17,7 @@ async def code_push_toFile(
         file_extension = {
         "python":".py",
         "java":".java",
+        "php":".php"
         }
 
         file_suffix = file_extension[language]
