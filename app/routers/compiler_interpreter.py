@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, Depends, BackgroundTasks
+from fastapi import APIRouter, Query, Depends, BackgroundTasks, HTTPException, status
 from typing import Annotated
 from sqlalchemy.orm import Session
 from datetime import datetime
@@ -9,6 +9,7 @@ from ..utils.temp_file_handeling import code_push_toFile
 from ..utils.subprocessor import languages
 from ..utils.compiler_interpreter import compute_testcases, submit_backgroundTask
 from ..db import get_db
+from ..models.compiler import CandidateExamResult
 ##########################################################
 
 
@@ -37,6 +38,13 @@ async def submit_results(
     current_user:str = "S0001", ## make this as jwt dependency
 ):
     try:
+        ## check is candidate results alredy submited
+        if db.query(CandidateExamResult).filter(CandidateExamResult.candidate_id == current_user).first():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Result already submited for Candidate ID: {current_user}"
+            )
+        
         ## create background task to save the results at
         submited_time = datetime.now(ZoneInfo("Asia/Kolkata"))
         backgroundTask.add_task(submit_backgroundTask,file_list,db,language,current_user,submited_time)
