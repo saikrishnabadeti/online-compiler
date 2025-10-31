@@ -80,14 +80,16 @@ async def execute_php_code(file_path, inputs=None, execution_timeout = None):
 
 
 
-async def handler(language, file_path, inputs = None):
+async def handler(language, file_path, inputs = None, execution_timeout = 3000):
     
     try:
+
+        
         start_time = time.time()
         if language == "python":
-            result = await execute_python_code(file_path, inputs, execution_timeout=300)
-        if language == "php":
-            result = await execute_php_code(file_path, inputs, execution_timeout=300)
+            result = await execute_python_code(file_path, inputs, execution_timeout=execution_timeout)
+        elif language == "php":
+            result = await execute_php_code(file_path, inputs, execution_timeout=execution_timeout)
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

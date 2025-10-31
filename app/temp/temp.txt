@@ -1,0 +1,1 @@
+This is just file which makes git to accept/commit this temp folder
