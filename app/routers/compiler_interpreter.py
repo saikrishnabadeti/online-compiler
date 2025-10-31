@@ -1,19 +1,38 @@
-from fastapi import APIRouter, Query, Depends, BackgroundTasks, HTTPException, status
+from fastapi import APIRouter, Query, Depends, Body, BackgroundTasks, HTTPException, status
 from typing import Annotated
 from sqlalchemy.orm import Session
 from datetime import datetime
 from zoneinfo import ZoneInfo
 ##########################################################
 
-from ..utils.temp_file_handeling import code_push_toFile
-from ..utils.subprocessor import languages
+from ..utils.temp_file_handeling import code_push_toFile, IndividualCode_push_toFile
+from ..utils.subprocessor import languages, handler
 from ..utils.compiler_interpreter import compute_testcases, submit_backgroundTask
 from ..db import get_db
 from ..models.compiler import CandidateExamResult
+from ..schemas.compiler_interpreter import ProgrameExecutionResult
 ##########################################################
 
 
 router = APIRouter(prefix="/interpreter")
+
+
+@router.post("/execute-programe", response_model=ProgrameExecutionResult)
+async def simple_compilation(
+    language:Annotated[languages, Query()],
+    file_path:Annotated[str, Depends(IndividualCode_push_toFile)],
+    user_input:Annotated[str|None, Body()] = None,
+    current_user:str = "S0001", ## make this as jwt dependency
+):
+    try:
+        output, error, execution_time = await handler(language=language, file_path=file_path, inputs=user_input)
+        return ProgrameExecutionResult(
+            output=output,
+            error=error,
+            execution_time=execution_time
+        )
+    except Exception as e:
+        raise e
 
 
 @router.post("/test_cases")

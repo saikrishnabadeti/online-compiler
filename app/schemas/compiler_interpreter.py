@@ -20,3 +20,9 @@ class CodeSubmit(BaseModel):
     code:str ## when code is sending from frontend u should use escape(\) char to avoid josonify errors
 
 
+
+## simple interperter result
+class ProgrameExecutionResult(BaseModel):
+    output:str
+    error:str
+    execution_time:float
