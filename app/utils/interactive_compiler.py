@@ -2,6 +2,11 @@
 import tempfile
 import subprocess
 import signal
+import javalang #type: ignore
+from javalang.parser import JavaSyntaxError #type: ignore
+import os
+import shutil
+from fastapi import WebSocket
 ###############################################################
 
 from .temp_file_handeling import file_extension
@@ -36,8 +41,12 @@ async def IndividualInteractiveCode_push_toFile(
         ## return file paths
         return tempf, tempd
 
-
+## Function which can take the chiled process object as input and return the process return code.
 async def returnSignalStatus(proc:subprocess.Popen,):
+    """
+    Function which can take the chiled process object as input.
+    return the process return code.
+    """
     if type(proc.returncode) == type(-1):
         if proc.returncode == 0:
             return "\n***Code Sussesfuly Executed***\n"
@@ -51,6 +60,57 @@ async def returnSignalStatus(proc:subprocess.Popen,):
         return f"\nExited with code {proc.returncode}\n"
 
 
+def get_java_filename(java_code):
+    try:
+        tree = javalang.parse.parse(java_code)
+        public_class = None
+
+        for _, node in tree.filter(javalang.tree.ClassDeclaration):
+            if 'public' in node.modifiers:
+                public_class = node.name
+                break
+
+        if public_class:
+            return f"{public_class}.java"
+        else:
+            # Return first class if no public
+            for _, node in tree.filter(javalang.tree.ClassDeclaration):
+                return f"{node.name}.java"
+            return "Unnamed.java"
+
+    except Exception as e:
+            return "Unnamed.java"
+
+
+async def JavaInteractiveCode_push_toFile(
+                  data:dict,
+):
+     
+    ## get the temp files and folders
+    tempf, tempd = await IndividualInteractiveCode_push_toFile(data)
+
+    ## if fileName not set by user
+    if not data["file_name"]:
+        ## create the file name based on the code
+        java_file_name = get_java_filename(data["code"])
+    else:
+        java_file_name = data["file_name"]
+    
+
+    ## rename the tempf with new_java_file
+    new_java_file = os.path.join(tempd, java_file_name)
+
+    ## for java filename should be public class name
+    shutil.copy2(tempf, os.path.join(tempd, new_java_file))
+    os.remove(tempf)
+
+    ## retrive class name
+    class_name = java_file_name.replace(".java", "")
+
+    return class_name, new_java_file, tempd
+    
+
+    
 
 
 

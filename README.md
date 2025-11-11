@@ -35,6 +35,14 @@ php --version
 # Zend Engine v4.3.6, Copyright (c) Zend Technologies with Zend OPcache v8.3.6, Copyright (c), by Zend Technologies
 ```
 
+
+```powershell
+java --version
+# openjdk 21.0.8 2025-07-15
+# OpenJDK Runtime Environment (build 21.0.8+9-Ubuntu-0ubuntu124.04.1)
+# OpenJDK 64-Bit Server VM (build 21.0.8+9-Ubuntu-0ubuntu124.04.1, mixed mode, sharing)
+```
+
 ---
 >PIP3 package requirments are at ***requirments.txt***
 
