@@ -43,6 +43,14 @@ java --version
 # OpenJDK 64-Bit Server VM (build 21.0.8+9-Ubuntu-0ubuntu124.04.1, mixed mode, sharing)
 ```
 
+
+```powershell
+gcc --version
+# gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0
+# Copyright (C) 2023 Free Software Foundation, Inc.
+# This is free software; see the source for copying conditions.  There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+```
+
 ---
 >PIP3 package requirments are at ***requirments.txt***
 

@@ -13,7 +13,8 @@ from ..schemas.compiler_interpreter import CodeSubmit
 file_extension = {
 "python":".py",
 "java":".java",
-"php":".php"
+"php":".php",
+"c":".c",
 }
 
 
