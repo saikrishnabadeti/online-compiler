@@ -15,6 +15,7 @@ file_extension = {
 "java":".java",
 "php":".php",
 "c":".c",
+"cpp":".cpp",
 }
 
 
