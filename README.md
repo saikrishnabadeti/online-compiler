@@ -3,8 +3,10 @@
 <details>
 <summary><h2>Specifications</h2></summary>
 
+<details>
+<summary><h4>Server Run Environment:</h4></summary>
 
-`operating system = Linux`
+`operating system = linux (Ubuntu)`
 
 ```powershell
 cat /etc/os-release
@@ -22,6 +24,22 @@ cat /etc/os-release
 # UBUNTU_CODENAME=noble
 # LOGO=ubuntu-logo
 ```
+
+`programing Language = Python`
+
+```powershell
+python3 --version
+## Python 3.12.3
+```
+
+`web-devloping frameWork = fastapi`
+
+</details>
+
+---
+
+<details>
+<summary><h4>Backend compiling components:</h4></summary>
 
 ```powershell
 python3 --version
@@ -63,6 +81,15 @@ g++ --version
 dotnet --version
 # 8.0.407
 ```
+
+```powershell
+node --version
+# v24.11.1
+```
+
+</details>
+
+
 
 ---
 >PIP3 package requirments are at ***requirments.txt***
