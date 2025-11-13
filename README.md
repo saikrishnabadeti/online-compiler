@@ -59,6 +59,11 @@ g++ --version
 # There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ```
 
+```powershell
+dotnet --version
+# 8.0.407
+```
+
 ---
 >PIP3 package requirments are at ***requirments.txt***
 

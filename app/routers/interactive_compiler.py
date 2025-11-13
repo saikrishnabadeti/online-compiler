@@ -16,6 +16,7 @@ from ..utils.interactive_compiler import (
     IndividualInteractiveCode_push_toFile, 
     returnSignalStatus,
     JavaInteractiveCode_push_toFile,
+    CsInteractiveCode_push_toFile,
     )
 ####################################################################################
 
@@ -348,7 +349,7 @@ async def interactive_compiler(
         ## get initial data while new web connection done
         init_data = await websocket.receive_json()
 
-        ## get the className, filePath, TempDir for java
+        ## get the filePath, TempDir for java
         tempf, tempd = await IndividualInteractiveCode_push_toFile(init_data)
 
 
@@ -449,9 +450,6 @@ async def interactive_compiler(
         proc.wait()
 
 
-
-
-
 @router.websocket("/cpp")
 async def interactive_compiler(
     websocket:WebSocket,
@@ -464,7 +462,7 @@ async def interactive_compiler(
         ## get initial data while new web connection done
         init_data = await websocket.receive_json()
 
-        ## get the className, filePath, TempDir for java
+        ## get the filePath, TempDir for cpp
         tempf, tempd = await IndividualInteractiveCode_push_toFile(init_data)
 
 
@@ -498,6 +496,101 @@ async def interactive_compiler(
         # Launch a child process (can be any interactive program)
         proc = subprocess.Popen(
             ["./exebytecode"],
+            stdin=input_w_fd,
+            stdout=output_w_fd,
+            stderr=error_w_fd,
+            close_fds=True,
+            cwd=tempd,
+        )
+
+        ## close the all write fd's
+        os.close(input_w_fd)
+        os.close(output_w_fd)
+        os.close(error_w_fd)
+
+        async def read_from_child():
+            while True:
+                ## check is client socket is on connection
+                if "DISCONNECTED" in websocket.client_state.__str__():
+                    break
+
+                await asyncio.sleep(0.01)
+                r, _, _ = select.select([output_r_fd, error_r_fd], [], [],0) 
+                if output_r_fd in r:
+                    try:
+                        data = os.read(output_r_fd, 1024)
+
+                    except OSError:
+                        proc.terminate()
+                        proc_return_code = await returnSignalStatus(proc=proc)
+                        await websocket.send_text(proc_return_code)
+                        await websocket.close()
+                        break
+                    except Exception as e:
+                        print(f"Error while handling output_r_fd: {e}")
+                    if not data:
+                        break
+                    await websocket.send_text(data.decode(errors="ignore"))
+                elif error_r_fd in r:
+                    try:
+                        data = os.read(error_r_fd, 1024)
+                    except OSError:
+                        proc.terminate()
+                        proc_return_code = await returnSignalStatus(proc=proc)
+                        await websocket.send_text(proc_return_code)
+                        await websocket.close()
+                        break
+                    except Exception as e:
+                        print(f"Error while handling error_r_fd: {e}")
+                    if not data:
+                        break
+                    await websocket.send_text(data.decode(errors="ignore"))
+
+        async def read_from_client():
+            async for message in websocket.iter_text():
+                os.write(input_r_fd, message.encode())
+
+    
+        await asyncio.gather(read_from_child(), read_from_client())
+
+    except Exception as e:
+        print("WebSocket closed or error:", e)
+    finally:
+        shutil.rmtree(tempd)
+        os.close(output_r_fd)
+        os.close(error_r_fd)
+        proc.kill()
+        proc.wait()
+
+
+
+@router.websocket("/cs")
+async def interactive_compiler(
+    websocket:WebSocket,
+):
+    try:
+        pass
+        ## accept webconnection
+        await websocket.accept()
+        
+        ## get initial data while new web connection done
+        init_data = await websocket.receive_json()
+
+        ## get the filepath and directory for c#, tempd is main part to run
+        tempf, tempd = await CsInteractiveCode_push_toFile(init_data)
+
+
+        # Create PTY pair
+        input_r_fd, input_w_fd = pty.openpty()
+        output_r_fd, output_w_fd = pty.openpty()
+        error_r_fd, error_w_fd = pty.openpty()
+
+        ## get the code exe path
+        DotnetExePath = os.getenv("DotnetExePath", "dotnet")
+
+        # Launch a child process (can be any interactive program)
+        proc = subprocess.Popen(
+            [DotnetExePath, "run"],
             stdin=input_w_fd,
             stdout=output_w_fd,
             stderr=error_w_fd,

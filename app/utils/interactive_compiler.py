@@ -7,6 +7,9 @@ from javalang.parser import JavaSyntaxError #type: ignore
 import os
 import shutil
 from fastapi import WebSocket
+
+from dotenv import load_dotenv
+load_dotenv()
 ###############################################################
 
 from .temp_file_handeling import file_extension
@@ -110,7 +113,35 @@ async def JavaInteractiveCode_push_toFile(
     return class_name, new_java_file, tempd
     
 
-    
+async def CsInteractiveCode_push_toFile(
+          data:dict
+):
+    """
+    Function which takes the cs code as input,
+    returns the tempd, tempf which are useful for c#
+    """
+     
+    ## get data from dict arg
+    code = data.get("code")
+
+    ## create required temp folder and path
+    tempd = tempfile.mkdtemp(dir=r"app/temp")
+
+    ## initiate new dotnet console project at tempd
+    DotnetExePath = os.getenv("DotnetExePath")
+    subprocess.run(
+        [DotnetExePath, "new", "console"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        cwd=tempd,
+    )
+
+    ## overwrite the code in Program.cs
+    tempf = os.path.join(tempd, "Program.cs")
+    with open(tempf, "w") as f:
+         f.write(code)
+
+    return tempf, tempd
 
 
 

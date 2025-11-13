@@ -16,6 +16,7 @@ file_extension = {
 "php":".php",
 "c":".c",
 "cpp":".cpp",
+"cs":".cs",
 }
 
 
