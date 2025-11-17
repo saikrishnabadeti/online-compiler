@@ -17,7 +17,8 @@ file_extension = {
 "c":".c",
 "cpp":".cpp",
 "cs":".cs",
-"nodejs":".js"
+"nodejs":".js",
+"bash":".sh",
 }
 
 
