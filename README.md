@@ -34,6 +34,11 @@ python3 --version
 
 `web-devloping frameWork = fastapi`
 
+`sandboxing = docker`
+```powershell
+docker --version
+# Docker version 28.5.2, build ecc6942
+```
 </details>
 
 ---

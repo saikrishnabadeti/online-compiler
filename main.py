@@ -5,6 +5,7 @@ from app.db import engine
 from app.routers import compiler_question
 from app.routers import compiler_interpreter
 from app.routers import interactive_compiler
+from app.routers import interactive_compiler_docker
 
 
 app = FastAPI()
@@ -18,6 +19,8 @@ async def startup():
 app.include_router(compiler_question.router)
 app.include_router(compiler_interpreter.router)
 app.include_router(interactive_compiler.router)
+app.include_router(interactive_compiler_docker.router)
+
 
 
 
