@@ -14,7 +14,7 @@ from ..schemas.compiler_interpreter import ProgrameExecutionResult
 ##########################################################
 
 
-router = APIRouter(prefix="/interpreter")
+router = APIRouter(prefix="/interpreter", tags=["INTERPRETER"])
 
 
 @router.post("/execute-programe", response_model=ProgrameExecutionResult)
@@ -54,6 +54,7 @@ async def submit_results(
     language:Annotated[languages, Query()],
     file_list:Annotated[list, Depends(code_push_toFile)],
     db:Annotated[Session, Depends(get_db)],
+    exam_id:Annotated[int, Query()],
     current_user:str = "S0001", ## make this as jwt dependency
 ):
     try:
@@ -66,10 +67,7 @@ async def submit_results(
         
         ## create background task to save the results at
         submited_time = datetime.now(ZoneInfo("Asia/Kolkata"))
-        backgroundTask.add_task(submit_backgroundTask,file_list,db,language,current_user,submited_time)
+        backgroundTask.add_task(submit_backgroundTask,file_list,db,language,current_user,submited_time,exam_id)
         return {"message":"successfully submited!!"}
     except Exception as e:
         raise e
-
-
-

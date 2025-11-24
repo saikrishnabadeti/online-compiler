@@ -4,7 +4,7 @@ from datetime import datetime
 
 ##############################################################
 
-from ..models.compiler import Questions
+from ..models.compiler import Questions, CodingExam
 from ..schemas.compiler_interpreter import RunTestCaseResult
 from ..utils.subprocessor import  handler
 from ..utils.results_dependency import result_store
@@ -23,15 +23,16 @@ async def compute_testcases(
     overall_results = []
     for i in file_list:
         ## get question_id and file_path
-        question_id = i[0]
+        blank_question_id = i[0]
+        exam_question_id = i[1]
         file_path = i[-1]
 
         # get test cases
-        db_question = db.query(Questions).filter(Questions.question_id == question_id).first()
+        db_question = db.query(Questions).filter(Questions.question_id == blank_question_id).first()
         if not db_question:
             raise HTTPException(
                 status_code= status.HTTP_404_NOT_FOUND,
-                detail=f"Question ID: {question_id} not Found"
+                detail=f"Question ID: {blank_question_id} not Found"
             )
         
         ## get test cases
@@ -54,7 +55,7 @@ async def compute_testcases(
                 success=True if testcase_output == interpreted_output else False
                 ).model_dump()]
             
-        overall_results += [{"question_id":question_id, "result":result}]
+        overall_results += [{"question_id":exam_question_id, "result":result}]
     return overall_results
 
 async def submit_backgroundTask(
@@ -63,13 +64,18 @@ async def submit_backgroundTask(
     language:str,
     current_user:str,
     submited_time:datetime,
-
+    exam_id:int,
 ):
+    ## get exam data by its exam_id
+    db_coding_exam = db.query(CodingExam).filter(CodingExam.id == exam_id).first()
+    questions_dict = db_coding_exam.questions
+
     ## get testcase results for each question
     overall_results = await compute_testcases(file_list=file_list, db=db, language=language)
 
     ## compute percentage for each question
     q_result = []
+    total_marks = 0
     for item in overall_results:
         question_id = item["question_id"]
         result = item["result"]
@@ -78,25 +84,19 @@ async def submit_backgroundTask(
         for testcase in result:
             if testcase["success"]:
                 passed_test_cases += 1
+
         ## cal percentage for each question
         percentage = (passed_test_cases/len(result)) *100
+
+
+        total_marks += (questions_dict[str(question_id)]["score"] * percentage)/100
+        
 
         ## save the result for each question
         q_result += [{"question_id": question_id, "percentage":percentage}]
 
+    
     ## save data at database
-    await result_store(candidate_id=current_user, result=q_result, db=db, submited_time=submited_time)
+    await result_store(candidate_id=current_user, result=q_result, db=db, submited_time=submited_time, exam_id=exam_id, total_marks=total_marks)
 
     return
-
-
-        
-
-
-
-
-
-
-
-
-

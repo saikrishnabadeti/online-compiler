@@ -1,11 +1,14 @@
 import tempfile
 import shutil
 from typing import Annotated
-from fastapi import Query, Body
+from fastapi import Query, Body, Depends
+from sqlalchemy.orm import Session 
 ############################################
 
 from ..utils.subprocessor import languages
 from ..schemas.compiler_interpreter import CodeSubmit
+from ..db import get_db
+from ..models.compiler import CodingExam
 ############################################
 
 
@@ -24,14 +27,24 @@ file_extension = {
 
 ## fuction to takes language and each question code, returns file paths for each question
 async def code_push_toFile(
+        exam_id:Annotated[int, Query()],
         language:Annotated[languages, Query()],
         request_body:Annotated[list[CodeSubmit], Body()],
+        db:Annotated[Session, Depends(get_db)],
 ):
         
         """
         fuction to takes language and each question code, 
         returns file paths for each question
         """
+
+        ## get exam data by its exam_id
+        db_coding_exam = db.query(CodingExam).filter(CodingExam.id == exam_id).first()
+        questions_dict = db_coding_exam.questions
+        print(questions_dict)
+
+        ## map exam and blank question id
+
 
         file_suffix = file_extension[language]
 
@@ -48,9 +61,8 @@ async def code_push_toFile(
                 with open(tempf, "w") as f:
                         f.write(i["code"])
 
-                file_paths += [[i["question_id"], tempf]]
+                file_paths += [[(questions_dict[str(i["exam_question_id"])]["blank_question_id"]),i["exam_question_id"], tempf]]
                 dir_paths += [tempd]
-        
         
         ## return file paths
         yield file_paths
@@ -60,6 +72,7 @@ async def code_push_toFile(
         ## remove the temp directory
         for i in dir_paths:
                 shutil.rmtree(i)
+
 
 
 
@@ -91,6 +104,7 @@ async def IndividualCode_push_toFile(
 
         ## remove the temp directory
         shutil.rmtree(tempd)
+
 
 
 

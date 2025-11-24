@@ -16,7 +16,7 @@ class RunTestCaseResponse(BaseModel):
 ## questions submit
 
 class CodeSubmit(BaseModel):
-    question_id:int
+    exam_question_id:int
     code:str ## when code is sending from frontend u should use escape(\) char to avoid josonify errors
 
 

@@ -9,31 +9,19 @@ from ..models.compiler import CandidateExamResult
 async def result_store(
         candidate_id:str,
         result:list[dict],
+        exam_id:int,
+        total_marks:float,
         db:Session,
         submited_time:datetime = datetime.now(ZoneInfo("Asia/Kolkata"))
 ):
     
     ## save the candidate results
-    new_row = CandidateExamResult(candidate_id = candidate_id, score = [{"time":submited_time.__str__(), "result": result}])
+    new_row = CandidateExamResult(
+        candidate_id = candidate_id, 
+        score = [{"time":submited_time.__str__(), "result": result}], 
+        exam_id = exam_id,
+        total = total_marks
+        )
     db.add(new_row)
     db.commit()
     return 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

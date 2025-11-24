@@ -1,6 +1,6 @@
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy import Column, INTEGER,  String, TEXT, JSON, ForeignKey
-from sqlalchemy.ext.mutable import  MutableList
+from sqlalchemy import Column, INTEGER,  String, TEXT, JSON, ForeignKey, DATETIME, FLOAT
+from sqlalchemy.ext.mutable import  MutableList, MutableDict
 
 
 class CompilerModelBase(DeclarativeBase):
@@ -25,12 +25,37 @@ class CandidateInfo(CompilerModelBase):
     candidate_id = Column(String(25), primary_key=True, nullable=False)
 
 
+
+    
+    
+class CodingExam(CompilerModelBase):
+    __tablename__ = "coding_exam"
+
+    id = Column(INTEGER, primary_key=True, nullable=False)
+    title = Column(String(100), nullable=False)
+    description = Column(TEXT, nullable=True)
+    window_start = Column(DATETIME, nullable=False)
+    window_end = Column(DATETIME, nullable=False)
+    duration = Column(FLOAT, nullable=False)
+    category = Column(String(100), nullable=False)
+    questions = Column(MutableDict.as_mutable(JSON), nullable=False)
+
+
+## Table by rahul -------
+
+class LanguagesInfo(CompilerModelBase):
+    __tablename__ = "languages"
+ 
+    lang_id = Column(INTEGER, primary_key=True, nullable=False, autoincrement=True)
+    lang_name = Column(String(50), nullable=False, unique=True)
+    description = Column(TEXT, nullable=True)
+
 class CandidateExamResult(CompilerModelBase):
     __tablename__ = "candidate_exam_result"
-
+ 
     candidate_id = Column(String(25), ForeignKey(column="candidate_info.candidate_id"), primary_key=True, nullable=False)
+    exam_id = Column(INTEGER, ForeignKey(column="coding_exam.id"), primary_key=True, nullable=False)
     score = Column(MutableList.as_mutable(JSON), nullable=False)
-    
-    
+    total = Column(FLOAT, nullable=False)
 
-
+##########################
