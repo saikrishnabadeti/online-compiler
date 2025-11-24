@@ -53,8 +53,9 @@ class LanguagesInfo(CompilerModelBase):
 class CandidateExamResult(CompilerModelBase):
     __tablename__ = "candidate_exam_result"
  
-    candidate_id = Column(String(25), ForeignKey(column="candidate_info.candidate_id"), primary_key=True, nullable=False)
-    exam_id = Column(INTEGER, ForeignKey(column="coding_exam.id"), primary_key=True, nullable=False)
+    result_id = Column(INTEGER, primary_key=True, nullable=False)
+    candidate_id = Column(String(25), ForeignKey(column="candidate_info.candidate_id"), nullable=False)
+    exam_id = Column(INTEGER, ForeignKey(column="coding_exam.id"), nullable=False)
     score = Column(MutableList.as_mutable(JSON), nullable=False)
     total = Column(FLOAT, nullable=False)
 

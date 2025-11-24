@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 
 from ..schemas.compiler_exam import ExamCreation, ExamCreationResponse, ExamUpdate
-from ..models.compiler import CodingExam, Questions
+from ..models.compiler import CodingExam, Questions, CandidateExamResult
 from ..db import get_db
 
 
@@ -163,3 +163,62 @@ async def delete_exam(
         return
     except Exception as e:
         raise e
+    
+
+
+ 
+####################### THIS ROUTER DONE BY RAHUL ###########################
+@router.get("/results")
+def get_results(
+    db: Session = Depends(get_db),
+    candidate_id: Optional[str] = Query(default=None),
+    exam_id: Optional[int] = Query(default=None),
+):
+    try:
+        query = db.query(CandidateExamResult)
+
+        if candidate_id:
+            query = query.filter(CandidateExamResult.candidate_id == candidate_id)
+        if exam_id is not None:
+            query = query.filter(CandidateExamResult.exam_id == exam_id)
+
+        records = query.all()
+ 
+        if not records:
+            missing = []
+            if candidate_id:
+                missing.append(f"candidate_id={candidate_id}")
+            if exam_id is not None:
+                missing.append(f"exam_id={exam_id}")
+ 
+            message = "No results found"
+            if missing:
+                message += f" for ({', '.join(missing)})"
+ 
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=message
+            )
+ 
+        formatted = [
+            {
+                "result_id": item.result_id,
+                "candidate_id": item.candidate_id,
+                "exam_id": item.exam_id,
+                "total_marks": item.total,
+                "scores": item.score,
+            }
+            for item in records
+        ]
+ 
+        return {"count": len(formatted), "results": formatted}
+ 
+    except Exception as e:
+        raise e
+
+##############################################################################
+
+
+
+
+
