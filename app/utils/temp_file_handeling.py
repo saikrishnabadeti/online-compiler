@@ -1,7 +1,7 @@
 import tempfile
 import shutil
 from typing import Annotated
-from fastapi import Query, Body, Depends
+from fastapi import Query, Body, Depends, HTTPException, status
 from sqlalchemy.orm import Session 
 ############################################
 
@@ -39,9 +39,16 @@ async def code_push_toFile(
         """
 
         ## get exam data by its exam_id
+
+        ## validate the examId
         db_coding_exam = db.query(CodingExam).filter(CodingExam.id == exam_id).first()
+        if not db_coding_exam:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Exam ID: {exam_id} Not Found on Question table at server..."
+            )
         questions_dict = db_coding_exam.questions
-        print(questions_dict)
+        
 
         ## map exam and blank question id
 
