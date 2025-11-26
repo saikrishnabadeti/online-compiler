@@ -5,12 +5,17 @@ from datetime import datetime
 
 
 
+from .compiler_question import GetQuestion
+
+
+
 
 ## schemas for exam crud operations
 
 class ExamQuestion(BaseModel):
     bank_question_id:int
     score:float
+    details:GetQuestion|None = None
 
 class ExamBase(BaseModel):
     title:str
@@ -36,5 +41,6 @@ class ExamUpdate(ExamBase):
     duration:Optional[float] = None
     category:Optional[str] = None
     questions:dict[int,ExamQuestion] | None = None
+
 
 

@@ -165,6 +165,31 @@ async def delete_exam(
         raise e
     
 
+@router.get("/get/details", response_model=ExamCreationResponse)
+async def get_exam(
+    db:Annotated[Session, Depends(get_db)],
+    exam_id:Annotated[int, Query()],
+):
+    try:
+        ## create base query
+        db_coding_exam = db.query(CodingExam)
+
+        ## apply the results
+        db_coding_exam = db_coding_exam.filter(CodingExam.id == exam_id).first()
+        
+
+        for exam_question, value in db_coding_exam.questions.items():
+            ## get details from question bank
+            details = db.query(Questions).filter(Questions.question_id == value["bank_question_id"]).first()
+
+            ## push each bank question deatils into regarding exam question
+            db_coding_exam.questions[exam_question]["details"] = details
+        
+        return db_coding_exam
+    except Exception as e:
+        raise e
+
+
 
  
 ####################### THIS ROUTER DONE BY RAHUL ###########################
