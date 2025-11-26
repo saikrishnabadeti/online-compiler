@@ -25,7 +25,7 @@ async def exam_creation(
         ## i.e, check is quetion ids' are in questions table at server.
 
         ## get question ids' to check in Questions table at server
-        all_question_ids = [i.blank_question_id for i in request_body.questions.values()]
+        all_question_ids = [i.bank_question_id for i in request_body.questions.values()]
         db_question_ids = [i.question_id for i in db.query(Questions).filter(Questions.question_id.in_(all_question_ids)).all()]
 
         ## list to catch not founf questions at db
@@ -87,7 +87,7 @@ async def exam_update(
             ## i.e, check is quetion ids' are in questions table at server.
 
             ## get question ids' to check in Questions table at server
-            all_question_ids = [i.question_id for i in request_body.questions.values()]
+            all_question_ids = [i.bank_question_id for i in request_body.questions.values()]
             db_question_ids = [i.question_id for i in db.query(Questions).filter(Questions.question_id.in_(all_question_ids)).all()]
 
             ## list to catch not founf questions at db

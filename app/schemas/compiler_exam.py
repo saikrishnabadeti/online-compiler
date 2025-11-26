@@ -9,7 +9,7 @@ from datetime import datetime
 ## schemas for exam crud operations
 
 class ExamQuestion(BaseModel):
-    blank_question_id:int
+    bank_question_id:int
     score:float
 
 class ExamBase(BaseModel):

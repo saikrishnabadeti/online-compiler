@@ -23,16 +23,16 @@ async def compute_testcases(
     overall_results = []
     for i in file_list:
         ## get question_id and file_path
-        blank_question_id = i[0]
+        bank_question_id = i[0]
         exam_question_id = i[1]
         file_path = i[-1]
 
         # get test cases
-        db_question = db.query(Questions).filter(Questions.question_id == blank_question_id).first()
+        db_question = db.query(Questions).filter(Questions.question_id == bank_question_id).first()
         if not db_question:
             raise HTTPException(
                 status_code= status.HTTP_404_NOT_FOUND,
-                detail=f"Question ID: {blank_question_id} not Found"
+                detail=f"Question ID: {bank_question_id} not Found"
             )
         
         ## get test cases

@@ -68,7 +68,7 @@ async def code_push_toFile(
                 with open(tempf, "w") as f:
                         f.write(i["code"])
 
-                file_paths += [[(questions_dict[str(i["exam_question_id"])]["blank_question_id"]),i["exam_question_id"], tempf]]
+                file_paths += [[(questions_dict[str(i["exam_question_id"])]["bank_question_id"]),i["exam_question_id"], tempf]]
                 dir_paths += [tempd]
         
         ## return file paths
