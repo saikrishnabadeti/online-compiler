@@ -59,10 +59,12 @@ async def submit_results(
 ):
     try:
         ## check is candidate results alredy submited
-        if db.query(CandidateExamResult).filter(CandidateExamResult.candidate_id == current_user).first():
+        if db.query(CandidateExamResult).filter(
+            CandidateExamResult.candidate_id == current_user,
+            CandidateExamResult.exam_id == exam_id).first():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Result already submited for Candidate ID: {current_user}"
+                detail=f"Result already submited for Candidate ID: {current_user} on exam ID: {exam_id}"
             )
         
         ## create background task to save the results at

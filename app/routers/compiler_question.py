@@ -1,23 +1,40 @@
 from fastapi import APIRouter, HTTPException, Body, Depends, Query, status, UploadFile
 from typing import Annotated
-from ..schemas.compiler_question import AddQuestion, GetQuestion, UpdateQuestion
-from ..db import get_db
-from ..models.compiler import Questions
 from sqlalchemy.orm import Session
 import pandas as pd
 from io import StringIO
 import json
+from fastapi.encoders import jsonable_encoder
+from pydantic import ValidationError
+
+
+from ..schemas.compiler_question import AddQuestion, QuestionBase, UpdateQuestion, QuestionTestCase, QuestionResponse
+from ..db import get_db
+from ..models.compiler import Questions
 
 
 router = APIRouter(prefix="/compiler-questions", tags=["Compiler-Questions"])
 
 
-@router.post("/add", response_model=GetQuestion)
+@router.post("/add", response_model=QuestionResponse)
 async def add_single_question(
     request_body:Annotated[AddQuestion, Body()],
     db:Annotated[Session, Depends(get_db)],
 ):
     try:
+        ## check is dupilicate question is trying to add
+        ## ----------------------------------------------
+        if db.query(Questions).filter(
+            Questions.title == request_body.title,
+            ).first():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Question alredy existed"
+            )
+        ## ----------------------------------------------
+
+
+
         data = Questions(**request_body.model_dump())
         db.add(data)
         db.commit()
@@ -44,22 +61,39 @@ async def add_multiple_question(
         if not all(col in df.columns for col in expected_columns):
             raise HTTPException(status_code=400, detail="CSV must contain all required columns")
         
+        added_q_count = 0
         for _, row in df.iterrows():
+
+            ## check is dupilicate question is trying to add
+            ## ----------------------------------------------
+            if db.query(Questions).filter(
+                Questions.title == row['title']
+                ).first():
+                continue ## countiune on next iters
+            ## ----------------------------------------------   
+
+            ## add quetion to db table
             problem = Questions(
                 title=row['title'],
                 question=row['question'],
                 description=row['description'],
                 sample_inputs=row['sample_inputs'],
                 sample_outputs=row['sample_outputs'],
-                test_cases=json.loads(row['test_cases'])
+                test_cases=[jsonable_encoder(QuestionTestCase(**case)) for case in json.loads(row['test_cases'])] 
             )
             db.add(problem)
+            added_q_count += 1
         db.commit()
-        return {"message": f"Inserted {len(df)} rows into 'Questions' table"}
+        return {"message": f"Inserted {added_q_count} rows into 'Questions' table"}
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            detail=f"{e.errors(include_url=False)}"
+            )
     except Exception as e:
         raise e
 
-@router.put("/update", response_model=GetQuestion)
+@router.put("/update", response_model=QuestionResponse)
 async def update_question(
     question_id:Annotated[int, Query()],
     update_body:Annotated[UpdateQuestion, Body()],
@@ -81,7 +115,7 @@ async def update_question(
     except Exception as e:
         raise e
     
-@router.get("/get", response_model=list[GetQuestion])  
+@router.get("/get", response_model=list[QuestionResponse])  
 async def get_questions(
     db:Annotated[Session, Depends(get_db)],
     question_id:Annotated[int|None, Query()]= None,
@@ -99,7 +133,7 @@ async def get_questions(
     except Exception as e:
         raise e
 
-@router.delete("/delete", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/delete", status_code=status.HTTP_200_OK)
 async def delete_question(
     db:Annotated[Session, Depends(get_db)],
     question_id:Annotated[int, Query()],
@@ -116,7 +150,7 @@ async def delete_question(
         ## delete the question
         db.delete(db_question)
         db.commit()
-        return
+        return {"message":f"Question ID: {question_id} deleted successfully"}
     except Exception as e:
         raise e
 

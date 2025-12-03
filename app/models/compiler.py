@@ -34,10 +34,12 @@ class CodingExam(CompilerModelBase):
     id = Column(INTEGER, primary_key=True, nullable=False)
     title = Column(String(100), nullable=False)
     description = Column(TEXT, nullable=True)
+    collage = Column(String(100), nullable=False)
     window_start = Column(DATETIME, nullable=False)
     window_end = Column(DATETIME, nullable=False)
     duration = Column(FLOAT, nullable=False)
     category = Column(String(100), nullable=False)
+    is_active = Column(INTEGER, nullable=False, default = 0)
     questions = Column(MutableDict.as_mutable(JSON), nullable=False)
 
 

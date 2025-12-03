@@ -30,7 +30,7 @@ class UpdateQuestion(QuestionBase):
     sample_outputs:str|None = None
     test_cases:list[QuestionTestCase]|None = None
 
-class GetQuestion(QuestionBase):
+class QuestionResponse(QuestionBase):
     question_id:int
 
 

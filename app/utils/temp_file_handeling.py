@@ -45,14 +45,26 @@ async def code_push_toFile(
         if not db_coding_exam:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Exam ID: {exam_id} Not Found on Question table at server..."
+                detail=f"Exam ID: {exam_id} Not Found on EXam table at server..."
             )
         questions_dict = db_coding_exam.questions
+
+        ## check is exam_question_id present in database for particular exam
+        miss_match_questions = [i for i in {item.exam_question_id for item in request_body} if str(i) not in questions_dict.keys()]
+        if miss_match_questions:
+               raise HTTPException(
+                      status_code=status.HTTP_404_NOT_FOUND,
+                      detail=f"Qestions: {miss_match_questions} not Found in Exam ID: {exam_id}"
+               )
         
+        ## check is no.of questions submited not more then exam questions
+        if len(request_body) > len(questions_dict):
+               raise HTTPException(
+                      status_code=422,
+                      detail=f"please Dont try to submit repeatable questions..."
+               )
 
         ## map exam and blank question id
-
-
         file_suffix = file_extension[language]
 
         ## variable to store the paths of each temp file
@@ -68,7 +80,7 @@ async def code_push_toFile(
                 with open(tempf, "w") as f:
                         f.write(i["code"])
 
-                file_paths += [[(questions_dict[str(i["exam_question_id"])]["bank_question_id"]),i["exam_question_id"], tempf]]
+                file_paths += [[(questions_dict[str(i["exam_question_id"])]["question_bank_id"]),i["exam_question_id"], tempf]]
                 dir_paths += [tempd]
         
         ## return file paths
