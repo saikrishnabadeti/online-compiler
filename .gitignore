@@ -1,0 +1,20 @@
+## ignore virtual enviroment folder
+.venv/
+
+## ignore __pycache__ folders
+__pycache__/
+
+
+## ignore .env files
+.env
+
+## ignore root test folder
+/test
+
+
+
+
+
+
+## ignore .vscode folder
+.vscode/

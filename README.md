@@ -113,7 +113,7 @@ bash --version
 
 ---
 > **Note:** <br>
-*We will update tools to connect with backend server web-socket using other python client-sockect to test/interact.*
+*updated tools to connect with backend server web-socket using other python client-sockect to test/interact.*
 
 
 
